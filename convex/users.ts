@@ -1,5 +1,5 @@
 import { access } from 'fs';
-import { mutation } from './_generated/server';
+import { mutation, query } from './_generated/server';
 import { ConvexError, v } from 'convex/values';
 
 export const createUser = mutation({
@@ -27,7 +27,7 @@ export const createUser = mutation({
 	},
 });
 
-export const getUserByClerkId = mutation({
+export const getUserByClerkId = query({
 	args: { clerkId: v.string() },
 	handler: async (ctx, { clerkId }) => {
 		return await ctx.db
@@ -37,7 +37,7 @@ export const getUserByClerkId = mutation({
 	},
 });
 
-export const getUserByStripeCustomerId = mutation({
+export const getUserByStripeCustomerId = query({
 	args: { stripeCustomerId: v.string() },
 	handler: async (ctx, { stripeCustomerId }) => {
 		return await ctx.db
@@ -47,7 +47,7 @@ export const getUserByStripeCustomerId = mutation({
 	},
 });
 
-export const getUserAccess = mutation({
+export const getUserAccess = query({
 	args: { userId: v.id('users'), courseId: v.id('courses') },
 	handler: async (ctx, { userId, courseId }) => {
 		const identity = await ctx.auth.getUserIdentity();
