@@ -1,19 +1,17 @@
 import { ConvexHttpClient } from 'convex/browser';
 import { api } from '../../../convex/_generated/api';
-import { Card } from '@/components/ui/card';
-import { CardHeader } from '@/components/ui/card';
-import { CardTitle } from '@/components/ui/card';
-import { CardContent } from '@/components/ui/card';
-import { CardFooter } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
-import Image from 'next/image';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
+import Image from 'next/image';
+import { Badge } from '@/components/ui/badge';
+import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
+import { Button } from '@/components/ui/button';
+import PurchaseButton from '@/components/PurchaseButton';
 
 const page = async () => {
 	const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 	const courses = await convex.query(api.courses.getCourses);
+
 	return (
 		<div className='container mx-auto py-8 px-4'>
 			<h1 className='text-3xl font-bold mb-8'>All Courses</h1>
@@ -46,7 +44,9 @@ const page = async () => {
 								className='text-lg px-3 py-1'>
 								${course.price.toFixed(2)}
 							</Badge>
-							<SignedIn>Purchase</SignedIn>
+							<SignedIn>
+								<PurchaseButton courseId={course._id} />
+							</SignedIn>
 							<SignedOut>
 								<SignInButton mode='modal'>
 									<Button variant='outline'>Enroll Now</Button>
@@ -59,5 +59,4 @@ const page = async () => {
 		</div>
 	);
 };
-
 export default page;
