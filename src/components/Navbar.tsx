@@ -34,7 +34,7 @@ const Navbar = () => {
 						<Button
 							variant={'outline'}
 							size={'sm'}
-							className='flex items-center gap-2'>
+							className='flex items-center gap-2 text-black'>
 							<CreditCardIcon className='size-4' />
 							<span className='hidden sm:inline'>Billing</span>
 						</Button>
@@ -49,7 +49,7 @@ const Navbar = () => {
 						<Button
 							variant='outline'
 							size='sm'
-							className='hidden sm:flex items-center gap-2'>
+							className='hidden sm:flex items-center gap-2 text-black'>
 							<LogOutIcon className='size-4' />
 							<span className='hidden sm:inline'>Log Out</span>
 						</Button>

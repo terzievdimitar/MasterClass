@@ -26,7 +26,7 @@ const PurchaseButton = ({ courseId }: { courseId: Id<'courses'> }) => {
 
 	const handlePurchase = async () => {
 		if (!user) {
-			alert('Please sign in to purchase the course.');
+			toast.error('Please sign in to purchase the course.');
 			return;
 		}
 		setIsLoading(true);
