@@ -24,6 +24,10 @@ export async function POST(req: Request) {
 			case 'checkout.session.completed':
 				await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
 				break;
+			case 'customer.subscription.created':
+			case 'customer.subscription.updated':
+				await handleSubscriptionUpsert(event.data.object as Stripe.Subscription, event.type);
+				break;
 			default:
 				console.log(`Unhandled event type: ${event.type}`);
 		}
@@ -59,4 +63,37 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 	});
 
 	// todo: send email receipt
+}
+
+async function handleSubscriptionUpsert(subscription: Stripe.Subscription, eventType: string) {
+	if (subscription.status !== 'active' || !subscription.latest_invoice) {
+		console.log(`Skipping subscription ${subscription.id} - Status: ${subscription.status}`);
+		return;
+	}
+
+	const stripeCustomerId = subscription.customer as string;
+	const user = await convex.query(api.users.getUserByStripeCustomerId, { stripeCustomerId });
+
+	if (!user) {
+		console.log('User not found for the given Stripe customer ID.');
+		return new Response(`User not found for the given Stripe customer ID. ${stripeCustomerId}`, { status: 404 });
+	}
+
+	try {
+		await convex.mutation(api.subscriptions.upsertSubscription, {
+			userId: user._id,
+			stripeSubscriptionId: subscription.id,
+			status: subscription.status,
+			planType: subscription.items.data[0].plan.interval as 'month' | 'year',
+			currentPeriodStart: subscription.current_period_start, // this is correct
+			currentPeriodEnd: subscription.current_period_end, // this is correct
+			cancelAtPeriodEnd: subscription.cancel_at_period_end,
+		});
+		console.log(`Subscription ${eventType} handled successfully.`);
+
+		// todo: send email success
+	} catch (error) {
+		console.log('Error upserting subscription.', error);
+		return new Response('Error upserting subscription.', { status: 500 });
+	}
 }
