@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { useQuery } from 'convex/react';
+import { useAction, useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { PRO_PLANS } from '@/constants';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Check, Loader2Icon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 const ProPage = () => {
 	const [loadingPlan, setLoadingPlan] = useState('');
@@ -19,8 +20,27 @@ const ProPage = () => {
 
 	const isYearlySubscriptionActive = userSubscription?.status === 'active' && userSubscription.planType === 'year';
 
-	const handlePlanSelection = (planId: string) => {
-		console.log(`Selected plan: ${planId}`);
+	const createProPlanCheckoutSession = useAction(api.stripe.createProPlanCheckoutSession);
+
+	const handlePlanSelection = async (planId: 'month' | 'year') => {
+		if (!user) {
+			toast.error('Please log in to subscribe to a plan.', { id: 'not-logged-in' });
+			return;
+		}
+
+		setLoadingPlan(planId);
+		try {
+			const result = await createProPlanCheckoutSession({ planId });
+			if (result.checkoutUrl) {
+				window.location.href = result.checkoutUrl;
+			}
+		} catch (error: any) {
+			if (error.message.includes('Rate limit exceeded')) {
+				toast.error('You have tried too manu times. Please wait a moment and try again.', { id: 'rate-limit' });
+			} else {
+				toast.error(`We couldn't initiate your purchase`, { id: 'checkout-error' });
+			}
+		}
 	};
 
 	return (
@@ -76,7 +96,7 @@ const ProPage = () => {
 										? 'bg-purple-600 hover:bg-purple-700 text-white'
 										: 'bg-white text-purple-600 border-2 border-purple-600 hover:bg-purple-50'
 								}`}
-								onClick={() => handlePlanSelection(plan.id)}
+								onClick={() => handlePlanSelection(plan.id as 'month' | 'year')}
 								disabled={
 									userSubscription?.status === 'active' &&
 									(userSubscription.planType === plan.id || isYearlySubscriptionActive)

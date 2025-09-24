@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
 import { ArrowRight } from 'lucide-react';
+import PurchaseButton from '@/components/PurchaseButton';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -53,11 +54,12 @@ export default async function Home() {
 									className='text-lg px-3 py-1'>
 									${course.price.toFixed(2)}
 								</Badge>
-								<SignedIn>Enroll</SignedIn>
-
+								<SignedIn>
+									<PurchaseButton courseId={course._id} />
+								</SignedIn>
 								<SignedOut>
 									<SignInButton mode='modal'>
-										<Button variant={'outline'}>Enroll Now</Button>
+										<Button variant='outline'>Enroll Now</Button>
 									</SignInButton>
 								</SignedOut>
 							</CardFooter>
