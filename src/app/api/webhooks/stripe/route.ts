@@ -111,7 +111,6 @@ async function handleSubscriptionUpsert(subscription: Stripe.Subscription, event
 		});
 		console.log(`Subscription ${eventType} handled successfully.`);
 
-		// todo: send email success
 		const isCreation = eventType === 'customer.subscription.created';
 		if (isCreation) {
 			await resend.emails.send({
