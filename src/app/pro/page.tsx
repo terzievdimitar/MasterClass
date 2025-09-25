@@ -40,6 +40,8 @@ const ProPage = () => {
 			} else {
 				toast.error(`We couldn't initiate your purchase`, { id: 'checkout-error' });
 			}
+		} finally {
+			setLoadingPlan('');
 		}
 	};
 

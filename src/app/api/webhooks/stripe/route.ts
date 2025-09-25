@@ -28,6 +28,9 @@ export async function POST(req: Request) {
 			case 'customer.subscription.updated':
 				await handleSubscriptionUpsert(event.data.object as Stripe.Subscription, event.type);
 				break;
+			case 'customer.subscription.deleted':
+				await handleSubscriptionDeleted(event.data.object as Stripe.Subscription, event.type);
+				break;
 			default:
 				console.log(`Unhandled event type: ${event.type}`);
 		}
@@ -95,5 +98,17 @@ async function handleSubscriptionUpsert(subscription: Stripe.Subscription, event
 	} catch (error) {
 		console.log('Error upserting subscription.', error);
 		return new Response('Error upserting subscription.', { status: 500 });
+	}
+}
+
+async function handleSubscriptionDeleted(subscription: Stripe.Subscription, eventType: string) {
+	try {
+		await convex.mutation(api.subscriptions.removeSubscription, {
+			stripeSubscriptionId: subscription.id,
+		});
+		console.log(`Subscription ${eventType} handled successfully.`);
+	} catch (error) {
+		console.log('Error deleting subscription.', error);
+		return new Response('Error deleting subscription.', { status: 500 });
 	}
 }

@@ -25,20 +25,47 @@ export const upsertSubscription = mutation({
 		cancelAtPeriodEnd: v.boolean(),
 	},
 	handler: async (ctx, args) => {
-		const existingSubscription = await ctx.db
+		const subscription = await ctx.db
 			.query('subscriptions')
 			.withIndex('by_stripeSubscriptionId', (q) => q.eq('stripeSubscriptionId', args.stripeSubscriptionId))
 			.unique();
 
-		if (existingSubscription) {
-			await ctx.db.patch(existingSubscription._id, args);
-			return existingSubscription;
+		if (subscription) {
+			await ctx.db.patch(subscription._id, args);
+			return subscription;
 		} else {
 			const subscriptionId = await ctx.db.insert('subscriptions', args);
 
 			await ctx.db.patch(args.userId, { currentSubscriptionId: subscriptionId });
 		}
 
+		return { success: true };
+	},
+});
+
+export const removeSubscription = mutation({
+	args: { stripeSubscriptionId: v.string() },
+	handler: async (ctx, args) => {
+		const subscription = await ctx.db
+			.query('subscriptions')
+			.withIndex('by_stripeSubscriptionId', (q) => q.eq('stripeSubscriptionId', args.stripeSubscriptionId))
+			.unique();
+
+		if (!subscription) {
+			console.log('No subscription found with the given Stripe subscription ID.');
+			return { success: false, message: 'Subscription not found' };
+		}
+
+		const user = await ctx.db
+			.query('users')
+			.withIndex('by_currentSubscriptionId', (q) => q.eq('currentSubscriptionId', subscription._id))
+			.unique();
+
+		if (user) {
+			await ctx.db.patch(user._id, { currentSubscriptionId: undefined });
+		}
+
+		await ctx.db.delete(subscription._id);
 		return { success: true };
 	},
 });
