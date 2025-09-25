@@ -61,6 +61,8 @@ const clerkWebhook = httpAction(async (ctx, request) => {
 				clerkId: id,
 				stripeCustomerId: customer.id,
 			});
+
+			// todo: send a welcome email here
 		} catch (error) {
 			console.error('Error creating user in Convex', error);
 			return new Response('Error creating user', { status: 500 });
