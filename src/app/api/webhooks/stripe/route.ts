@@ -105,8 +105,8 @@ async function handleSubscriptionUpsert(subscription: Stripe.Subscription, event
 			stripeSubscriptionId: subscription.id,
 			status: subscription.status,
 			planType: subscription.items.data[0].plan.interval as 'month' | 'year',
-			currentPeriodStart: subscription.current_period_start, // this is correct
-			currentPeriodEnd: subscription.current_period_end, // this is correct
+			currentPeriodStart: (subscription as any).current_period_start,
+			currentPeriodEnd: (subscription as any).current_period_end,
 			cancelAtPeriodEnd: subscription.cancel_at_period_end,
 		});
 		console.log(`Subscription ${eventType} handled successfully.`);
@@ -121,8 +121,8 @@ async function handleSubscriptionUpsert(subscription: Stripe.Subscription, event
 				react: ProPlanActivatedEmail({
 					name: user.name,
 					planType: subscription.items.data[0].plan.interval,
-					currentPeriodStart: subscription.current_period_start,
-					currentPeriodEnd: subscription.current_period_end,
+					currentPeriodStart: (subscription as any).current_period_start,
+					currentPeriodEnd: (subscription as any).current_period_end,
 					url: process.env.NEXT_PUBLIC_APP_URL!,
 				}),
 			});
