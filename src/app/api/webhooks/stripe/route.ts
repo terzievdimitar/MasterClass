@@ -3,6 +3,9 @@ import stripe from '@/lib/stripe';
 import { ConvexHttpClient } from 'convex/browser';
 import { api } from '../../../../../convex/_generated/api';
 import { Id } from '../../../../../convex/_generated/dataModel';
+import resend from '@/lib/resend';
+import PurchaseConfirmationEmail from '@/emails/PurchaseConformationEmail';
+import ProPlanActivatedEmail from '@/emails/ProPlanActivatedEmail';
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
@@ -65,7 +68,21 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 		stripePurchaseId: session.id,
 	});
 
-	// todo: send email receipt
+	// Send purchase confirmation email
+	if (session.metadata && session.metadata.courseTitle && session.metadata.courseImage) {
+		await resend.emails.send({
+			from: 'MasterClass <onboarding@masterclass.dimitarterziev.com>',
+			to: user.email,
+			subject: 'Purchase Confirmation - Access Your Course Now',
+			react: PurchaseConfirmationEmail({
+				customerName: user.name,
+				courseTitle: session.metadata?.courseTitle,
+				courseImage: session.metadata?.courseImage,
+				purchaseAmount: (session.amount_total || 0) / 100,
+				courseUrl: `${process.env.NEXT_PUBLIC_APP_URL}/courses/${courseId}`,
+			}),
+		});
+	}
 }
 
 async function handleSubscriptionUpsert(subscription: Stripe.Subscription, eventType: string) {
@@ -95,6 +112,21 @@ async function handleSubscriptionUpsert(subscription: Stripe.Subscription, event
 		console.log(`Subscription ${eventType} handled successfully.`);
 
 		// todo: send email success
+		const isCreation = eventType === 'customer.subscription.created';
+		if (isCreation) {
+			await resend.emails.send({
+				from: 'MasterClass <onboarding@masterclass.dimitarterziev.com>',
+				to: user.email,
+				subject: 'Subscription Active - Enjoy Your Pro Plan Benefits',
+				react: ProPlanActivatedEmail({
+					name: user.name,
+					planType: subscription.items.data[0].plan.interval,
+					currentPeriodStart: subscription.current_period_start,
+					currentPeriodEnd: subscription.current_period_end,
+					url: process.env.NEXT_PUBLIC_APP_URL!,
+				}),
+			});
+		}
 	} catch (error) {
 		console.log('Error upserting subscription.', error);
 		return new Response('Error upserting subscription.', { status: 500 });
