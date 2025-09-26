@@ -15,7 +15,7 @@
 ![](https://img.shields.io/badge/Convex-3982CE?style=for-the-badge&logo=Convex&logoColor=white)
 ![](https://img.shields.io/badge/Stripe-008CDD?style=for-the-badge&logo=stripe&logoColor=white)
 
-<img src ="./public/bg-3.png" width="80%">
+<img src ="./src/app/bg-3.png" width="80%">
 
 </div>
 
