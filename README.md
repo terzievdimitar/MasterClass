@@ -3,7 +3,7 @@
 
 <div align="center">
 <a href="https://github.com/terzievdimitar/stripe-subscriptions" target="blank">
-<img src="./public/favicon.ico" width="90" alt="Logo" />
+<img src="./src/app/favicon.ico" width="90" alt="Logo" />
 </a>
 
 <h2> Project Name : MasterClass - Stripe Subscriptions </h2>
@@ -15,7 +15,7 @@
 ![](https://img.shields.io/badge/Convex-3982CE?style=for-the-badge&logo=Convex&logoColor=white)
 ![](https://img.shields.io/badge/Stripe-008CDD?style=for-the-badge&logo=stripe&logoColor=white)
 
-<img src ="./public/bg-3.webp" width="80%">
+<img src ="./public/bg-3.png" width="80%">
 
 </div>
 
